@@ -1,86 +1,57 @@
-# cyra-agent
+# CYRA (Cyber Aura) - Proactive Multi-Agent Cybersecurity Concierge
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.5.0`
-
-## Project Structure
-
-```
-cyra-agent/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
-```
-
-> 💡 **Tip:** Use [Gemini CLI](https://github.com/google-gemini/gemini-cli) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
-
-## Requirements
-
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-
-
-## Quick Start
-
-Install `agents-cli` and its skills if not already installed:
-
-```bash
-uvx google-agents-cli setup
-```
-
-Install required packages:
-
-```bash
-agents-cli install
-```
-
-Test the agent with a local web server:
-
-```bash
-agents-cli playground
-```
-
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
-
-## Commands
-
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+CYRA is an advanced, proactive personal cybersecurity assistant built utilizing the Google Agent Development Kit (ADK) and Gemini 2.5 Flash. Unlike reactive anti-virus software, CYRA operates natively as an ambient intelligence layer that analyzes incoming text streams, social communication logs, and audio/text call transcripts to intercept social engineering, phishing, and identity extraction scams before a user interacts with them.
 
 ---
 
-## Development
+## 🧠 Core Architecture (3-Agent Orchestration Flow)
 
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+CYRA implements a decoupled Multi-Agent Routing Loop pattern where specialized modules reason over data contextually:
 
-## Deployment
+1. **Parser & Extractor Agent:** Natively handles incoming message payloads, stripping down complex text strings to isolate target links, structural patterns, and suspicious phrasing tokens.
+2. **Threat Intelligence Agent:** Executes deep reasoning loops by passing extracted tokens against our Model Context Protocol (MCP Server) simulator—evaluating against active repositories of known hostile top-level domains, look-alike patterns, and credential-harvesting indicators.
+3. **User Notifier Agent:** Consolidates the technical risk signals and structures a friendly, high-visibility Markdown warning banner tailored directly for end-user safety.
 
-```bash
-gcloud config set project <your-project-id>
-agents-cli deploy
+---
+
+## 🛡️ Key Security Features (What Makes CYRA Stand Out)
+
+### 1. Dynamic Link Decrypter (Fake URL Defense)
+Traces the background behavior of shortened, masked, or look-alike domains. If an incoming message features deceptive links or suspicious Top-Level Domains (such as `.xyz`, `.top`, or `.click`), CYRA analyzes downstream paths to identify potential phishing loops and brand impersonation.
+
+### 2. Context-Aware Privacy Guard
+Monitors structural context for highly sensitive credential harvesting. If an attacker leverages conversational engineering to aggressively solicit a user's critical vectors—such as OTPs, account passwords, bank metrics, or identity card numbers—CYRA immediately Flags the risk signature.
+
+### 3. Phishing Audio/Text Call Scanner
+Designed specifically to tackle modern high-urgency and deepfake voice-to-text scams. It maps lexical semantic profiles within chat or call transcripts to instantly detect high-pressure intimidation phrases (e.g., immediate arrest, bank account blocked, or authority impersonator patterns).
+
+---
+
+## 🛠️ Modular Agent Skills (`app/tools.py`)
+
+CYRA leverages four specialized Python-native tool structures to extract context:
+*   `scan_text_stream(message_text)`: Core lexical filter targeting untrusted TLDs and aggressive keyword extractions.
+*   `decrypt_link_redirects(url)`: Traces hidden hop paths and masked structural URLs.
+*   `context_privacy_guard(message_text)`: Evaluates whether active queries are targeting credential architectures.
+*   `analyze_call_transcript(transcript)`: Parses deepfake text layers for high-pressure timelines or authority impersonation language.
+
+---
+
+## 💻 Local Playground Verification Output
+
+The system has been completely verified within the local interactive ADK framework environment. When an active phishing or extraction vector is processed, CYRA generates a dedicated Markdown warning:
+
+```markdown
+⚠️ CYRA WARNING ALERT ⚠️
+----------------------------------------
+🔷 CYRA SECURITY ALERT – Phishing Lottery Scam
+🚨 RISK LEVEL: HIGH
+🔍 THREAT TYPE: Phishing Link / Credential Harvesting / Social Engineering
+
+📋 WHAT WAS FOUND: 
+• A suspicious Top-Level Domain (.top) and a known malicious domain (win-lottery-now.top) were isolated.
+• The payload explicitly solicits a "bank account number," triggering the credential protection layer.
+
+💡 WHY THIS IS DANGEROUS: 
+This is a high-pressure social engineering scam masquerading as a lottery reward to compromise individual banking data structures.
 ```
-
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
-
-## Observability
-
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
