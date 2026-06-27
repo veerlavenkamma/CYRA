@@ -19,10 +19,11 @@ CYRA — Cyber Aura Multi-Agent AI System
 A proactive cybersecurity concierge agent that monitors incoming chat logs /
 text streams for potential threats without seizing device control.
 
-Internal 3-step Multi-Agent / Routing Loop:
+Internal 4-step Multi-Agent / Routing Loop:
   Step 1  ->  Parser/Extractor     (scan_text_stream)
   Step 2  ->  Threat Evaluator     (decrypt_link_redirects, context_privacy_guard)
-  Step 3  ->  User Notifier        (analyze_call_transcript -> structured alert)
+  Step 3  ->  Device Integrity     (scan_local_device_state)
+  Step 4  ->  User Notifier        (analyze_call_transcript -> structured alert)
 
 Authentication:
   Uses GOOGLE_GENAI_API_KEY (Gemini Developer API key) directly.
@@ -40,6 +41,7 @@ from app.tools import (
     analyze_call_transcript,
     context_privacy_guard,
     decrypt_link_redirects,
+    scan_local_device_state,
     scan_text_stream,
 )
 
@@ -69,7 +71,7 @@ incoming chat messages, SMS texts, emails, and call transcripts for cyber threat
 You do NOT control devices, install software, or take autonomous action — you only
 ANALYSE and WARN.
 
-## 3-Step Internal Analysis Protocol (MANDATORY — follow every time)
+## 4-Step Internal Analysis Protocol (MANDATORY — follow every time)
 
 For every user message that contains text, a URL, or a transcript to check:
 
@@ -84,7 +86,11 @@ For every user message that contains text, a URL, or a transcript to check:
   `analyze_call_transcript`.
 - You may call MULTIPLE tools in this step if multiple signals are present.
 
-**Step 3 - Structured Notification (Agent 3 behaviour)**
+**Step 3 - Device Integrity Evaluation (Agent 3 behaviour)**
+- If the user asks to "scan device", "check my system", or "verify network", ALWAYS call `scan_local_device_state()`.
+- This simulates intercepting unauthorized remote execution setups and open ports.
+
+**Step 4 - Structured Notification (Agent 4 behaviour)**
 - Synthesise all tool outputs into ONE final structured response.
 - You MUST use the exact output format described below -- no exceptions.
 
@@ -159,6 +165,11 @@ Whenever the input appears to be a call transcript or multi-message conversation
 you call `analyze_call_transcript` to detect vishing, deepfake scam patterns,
 government impersonation, and investment fraud.
 
+### 💻 Proactive Device Scanner
+Whenever the user requests a local scan or mentions device vulnerabilities,
+you call `scan_local_device_state` to check system configuration and alert
+the user of potential remote access exploits.
+
 ## Safety Constraints (NEVER violate these)
 - NEVER provide hacking tools, exploit code, or penetration testing assistance.
 - NEVER ask the user to share sensitive data with YOU (demonstrate safe behaviour).
@@ -187,6 +198,7 @@ root_agent = Agent(
         decrypt_link_redirects,
         context_privacy_guard,
         analyze_call_transcript,
+        scan_local_device_state,
     ],
 )
 

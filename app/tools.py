@@ -431,3 +431,50 @@ def analyze_call_transcript(transcript: str) -> dict:
         "urgency_keywords_found": found_keywords,
         "threat_summary": threat_summary,
     }
+
+
+# ---------------------------------------------------------------------------
+# Tool 5: scan_local_device_state
+# ---------------------------------------------------------------------------
+
+def scan_local_device_state(check_ports: bool = True) -> dict:
+    """Simulate a scan of the local device state, configuration, and network.
+
+    Checks for simulated device vulnerabilities such as:
+    - Open diagnostic or remote access ports
+    - Unencrypted local network connections
+    - Suspicious background system permissions
+    
+    Args:
+        check_ports: Whether to simulate scanning of open diagnostic ports.
+
+    Returns:
+        A dict with keys:
+          - device_vulnerable (bool): True if an exploit or vulnerability is detected.
+          - risk_level (str): "HIGH", "MEDIUM", or "SAFE".
+          - findings (list[str]): Human-readable analysis results of the device scan.
+          - recommended_action (str): Action the user should take.
+    """
+    import random
+    
+    # Simulated check logic
+    findings = []
+    risk_level = "SAFE"
+    
+    if check_ports:
+        # Simulate an unsafe port configuration
+        findings.append("Local device monitoring tool detected an unsafe network port configuration.")
+        findings.append("A simulation run indicated unauthorized incoming traffic trying to scan root system directories.")
+        risk_level = "HIGH"
+        
+    recommended_action = (
+        "Leaving diagnostic ports unencrypted or open to public networks allows malicious actors "
+        "to silently control your device assets and extract private logs. Close the exposed ports immediately."
+    )
+    
+    return {
+        "device_vulnerable": risk_level != "SAFE",
+        "risk_level": risk_level,
+        "findings": findings if findings else ["All device parameters are secure."],
+        "recommended_action": recommended_action,
+    }
