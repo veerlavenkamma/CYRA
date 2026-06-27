@@ -1,0 +1,114 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "lottery_phishing_link",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Please check this message I received: 'Congratulations! You have won a $5,000 lottery prize! Claim your reward now before it expires: https://win-lottery-now.top/claim?ref=USER123. Enter your bank account number to receive the transfer.'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "shortened_url_suspicious",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Is this link safe to click? bit.ly/urgent-kyc-verify"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "irs_impersonation_call",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Analyse this call transcript for me: 'This is an automated message from the IRS. There is a warrant out for your arrest due to tax fraud. You owe $2,400 in unpaid taxes. If you do not call back immediately at 1-800-XXX-XXXX, the police will come to your house today. This is your last warning. Act now to avoid criminal proceedings and jail time.'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "otp_credential_request",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "My 'bank' just texted me: 'ALERT: Your account has been suspended due to suspicious activity. To restore access, please share your OTP and confirm your CVV and card number with our security team via this link: urgent-kyc-update.click/verify'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "tech_support_scam_transcript",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Here is a conversation from someone who called me claiming to be Microsoft support: 'Hello, this is Microsoft technical support. Our system has detected that your computer has been hacked and has a critical virus. You need to install TeamViewer right now so we can fix it remotely. This is urgent — your data will be deleted in 24 hours if you don't act immediately. Give us access now.'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "clean_casual_message",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Check this message from my friend: 'Hey! Are you coming to dinner tonight? We're meeting at 7pm at the Italian place on Main Street. Let me know if you can make it! 😊'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "clean_business_email",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Is this email safe? 'Hi Sarah, Just following up on the Q3 report we discussed. Could you send over the final version by Thursday? No rush if you need more time. Thanks, John (Marketing)'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "typosquat_bank_link",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Someone sent me this link to log in to my bank account: https://bankofamerica-secure-login.xyz/signin?next=/dashboard. Should I click it?"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "crypto_investment_scam",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "A new friend online sent me this: 'I want to share a special bitcoin investment opportunity with you darling. I made $50,000 last month with guaranteed 300% returns. Just send me your wallet seed phrase and I will add you to the exclusive group. This limited time offer expires soon!'"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "parcel_phishing",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Got this SMS: 'FedEx: Your parcel #FX928374 is on hold. Pay the $2.99 customs fee to release it: fedex-track-parcel.click/pay?id=FX928374. Enter your credit card details to proceed.'"
+          }
+        ]
+      }
+    }
+  ]
+}

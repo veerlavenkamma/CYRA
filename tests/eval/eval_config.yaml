@@ -1,0 +1,194 @@
+metrics_to_run:
+  - cyra_threat_detection_accuracy
+  - cyra_safe_message_precision
+  - cyra_alert_format_compliance
+  - cyra_tool_coverage
+  - agent_turn_count
+
+custom_metrics:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Metric 1: Threat Detection Accuracy (LLM-as-judge)
+  # Verifies CYRA correctly identifies threats in known-malicious messages.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: cyra_threat_detection_accuracy
+    prompt_template: |
+      You are a cybersecurity expert evaluating an AI security agent called CYRA.
+
+      Your task: Determine whether CYRA correctly identified the threat (or absence of threat)
+      in the user's input.
+
+      Scoring rubric (1–5):
+      5 — CYRA correctly identified ALL threat signals, named the threat type accurately,
+          and provided specific actionable safety advice. The WARNING ALERT was triggered
+          when the input was malicious, and "System Protected. Status: Safe." was returned
+          when the input was benign.
+      4 — CYRA identified the main threat but missed one secondary signal. Alert format correct.
+      3 — CYRA identified a threat but was vague or incomplete. Alert format partially correct.
+      2 — CYRA mostly missed the threat or gave a misleading verdict.
+      1 — CYRA failed to detect an obvious threat OR wrongly flagged a clean message as dangerous.
+
+      ### Evaluation Input:
+      User Prompt: {prompt}
+      CYRA Final Response: {response}
+      Full Agent Trace (tool calls and outputs): {agent_data}
+
+      Return your evaluation as a valid JSON object:
+      {
+        "score": <integer 1–5>,
+        "explanation": "<detailed rationale>"
+      }
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Metric 2: Safe Message Precision (LLM-as-judge)
+  # Ensures CYRA does NOT generate false positives on benign messages.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: cyra_safe_message_precision
+    prompt_template: |
+      You are a cybersecurity expert evaluating an AI security agent called CYRA.
+
+      Your task: Evaluate whether CYRA avoided false positives (incorrect threat alerts
+      on genuinely safe messages) while still being appropriately vigilant.
+
+      A "safe message" is one with no URLs containing suspicious TLDs, no credential
+      keywords, no urgency scam language, and no known malicious indicators.
+
+      Scoring rubric (1–5):
+      5 — For safe messages: CYRA correctly returned "System Protected. Status: Safe."
+          without false alarms. For threat messages: CYRA correctly raised the alert
+          (this metric still passes for threats).
+      4 — Minor unnecessary caution expressed but no incorrect ALERT triggered.
+      3 — CYRA was overly cautious and gave a weak warning on a clean message, causing
+          mild user confusion.
+      2 — CYRA incorrectly triggered a WARNING ALERT on a clearly benign message.
+      1 — CYRA completely failed to differentiate between safe and malicious content.
+
+      ### Evaluation Input:
+      User Prompt: {prompt}
+      CYRA Final Response: {response}
+      Full Agent Trace (tool calls and outputs): {agent_data}
+
+      Return your evaluation as a valid JSON object:
+      {
+        "score": <integer 1–5>,
+        "explanation": "<detailed rationale>"
+      }
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Metric 3: Alert Format Compliance (LLM-as-judge)
+  # Checks that CYRA's output matches the required structured alert format.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: cyra_alert_format_compliance
+    prompt_template: |
+      You are a quality assurance reviewer for an AI security system called CYRA.
+
+      Your task: Evaluate whether the CYRA response follows the required structured
+      output format exactly.
+
+      For THREAT messages, the response MUST contain:
+      - "⚠️ CYRA WARNING ALERT ⚠️" header
+      - A RISK LEVEL field (HIGH or MEDIUM)
+      - A THREAT TYPE field
+      - A "WHAT WAS FOUND" bullet section
+      - A "WHY THIS IS DANGEROUS" section
+      - A "WHAT YOU SHOULD DO" section with specific action bullets
+      - The "Powered by CYRA — Cyber Aura Security Intelligence" footer
+
+      For SAFE messages, the response MUST contain:
+      - "✅ System Protected. Status: Safe." opener
+      - "CYRA SECURITY SCAN — CLEAR" header
+      - A list of which checks were performed
+
+      Scoring rubric (1–5):
+      5 — Perfect format compliance. All required sections present and well-populated.
+      4 — Minor formatting deviation but all key information present.
+      3 — Some sections missing or out of order, but the verdict and key findings are clear.
+      2 — Significant format violations — missing critical sections or wrong verdict marker.
+      1 — No structured format used at all. Free-form response only.
+
+      ### Evaluation Input:
+      User Prompt: {prompt}
+      CYRA Final Response: {response}
+      Full Agent Trace: {agent_data}
+
+      Return your evaluation as a valid JSON object:
+      {
+        "score": <integer 1–5>,
+        "explanation": "<detailed rationale>"
+      }
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Metric 4: Tool Coverage (Deterministic Python)
+  # Verifies CYRA called the appropriate tools for the given input type.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: cyra_tool_coverage
+    custom_function: |
+      import json
+
+      def evaluate(instance):
+          """
+          Check that CYRA called at least scan_text_stream (mandatory)
+          and the appropriate secondary tools based on input signals.
+          Score 1-5 based on tool call completeness.
+          """
+          agent_data = instance.get("agent_data") or {}
+          turns = agent_data.get("turns", [])
+          prompt_text = ""
+          try:
+              prompt_parts = instance.get("prompt", {}).get("parts", [])
+              prompt_text = " ".join(p.get("text", "") for p in prompt_parts).lower()
+          except Exception:
+              pass
+
+          # Collect all function calls made across all turns
+          called_tools = set()
+          for turn in turns:
+              for event in turn.get("events", []):
+                  content = event.get("content", {})
+                  parts = content.get("parts", []) if isinstance(content, dict) else []
+                  for part in parts:
+                      if isinstance(part, dict) and "function_call" in part:
+                          fc = part["function_call"]
+                          called_tools.add(fc.get("name", ""))
+
+          score = 1
+          mandatory_tool = "scan_text_stream"
+
+          # scan_text_stream must always be called
+          if mandatory_tool not in called_tools:
+              return {"score": 1, "explanation": "scan_text_stream was not called — mandatory tool missing."}
+
+          score = 3  # baseline: mandatory tool called
+
+          # Check for URL → decrypt_link_redirects
+          url_signals = ["http", "bit.ly", "tinyurl", ".xyz", ".top", ".click", ".tk"]
+          has_url = any(sig in prompt_text for sig in url_signals)
+          if has_url and "decrypt_link_redirects" in called_tools:
+              score += 1
+
+          # Check for credential/privacy signals → context_privacy_guard
+          privacy_signals = ["otp", "pin", "password", "cvv", "card number", "account number", "aadhaar", "ssn"]
+          has_privacy = any(sig in prompt_text for sig in privacy_signals)
+          if has_privacy and "context_privacy_guard" in called_tools:
+              score += 1
+
+          # Check for transcript signals → analyze_call_transcript
+          transcript_signals = ["transcript", "call", "this is", "arrest", "warrant", "irs", "microsoft support"]
+          has_transcript = any(sig in prompt_text for sig in transcript_signals)
+          if has_transcript and "analyze_call_transcript" in called_tools:
+              score = min(score + 1, 5)
+
+          return {
+              "score": min(score, 5),
+              "explanation": f"Tools called: {sorted(called_tools)}. Mandatory: {mandatory_tool in called_tools}. URL signals: {has_url}. Privacy signals: {has_privacy}. Transcript signals: {has_transcript}."
+          }
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Metric 5: Turn Count (Deterministic — reused from scaffold)
+  # Tracks how many turns CYRA takes to complete analysis.
+  # Ideal: 1-2 turns for a single message scan.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: agent_turn_count
+    custom_function: |
+      def evaluate(instance):
+          turns = (instance.get("agent_data") or {}).get("turns", [])
+          return {"score": len(turns)}
